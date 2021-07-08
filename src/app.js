@@ -26,7 +26,7 @@ const closedMarkets = {};
 const marketUpDown = {}
 
 const port = process.env.PORT || 80;
-server.listen(port, '0.0.0.0', (err) => {
+server.listen(port, (err) => {
     if (err) {
         console.log(err);
         return;
