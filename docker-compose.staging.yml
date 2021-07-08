@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  node_server_staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: nodejs
+    container_name: nandex_node_server_staging
+    restart: on-failure
+    env_file: .env
+    environment:
+      - NODE_ENV=staging
+      - PORT=8080
+    ports:
+      - "80:8080"
+    volumes:
+#      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+    command: npm run start
+volumes:
+  node_modules:

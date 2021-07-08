@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  node_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+#    image: nodejs
+    container_name: nandex_node_server
+    restart: always
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+    ports:
+      - "80:80"
+    volumes:
+      - node_modules:/usr/src/app/node_modules
+    command: npm run start
+volumes:
+  node_modules:
