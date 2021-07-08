@@ -1,7 +1,7 @@
 module.exports = {
   WS_APP_ID_DEV: 1089,
   WS_APP_ID_STAGING: "YOUR_WS_APP_ID_STAGING",
-  WS_APP_ID_PROD: "1089",
+  WS_APP_ID_PROD: 1089,
 
   STR_ENV_DEV: "development",
   STR_ENV_STAGING: "staging",
