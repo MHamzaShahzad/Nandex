@@ -13,9 +13,9 @@ services:
       - NODE_ENV=staging
       - PORT=8080
     ports:
-      - "80:8080"
+      - "8081:8080"
     volumes:
-#      - .:/usr/src/app
+     - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
     command: npm run start
 volumes:
