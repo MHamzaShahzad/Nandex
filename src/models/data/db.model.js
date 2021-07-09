@@ -34,10 +34,10 @@ module.exports = {
             let query;
             let values = [];
             if (fk_section_id) {
-                query = `SELECT COUNT(*) as counts, type, pair, start_interval, end_interval FROM ?? WHERE status = ? AND fk_section_id = ? GROUP BY type, pair`;
+                query = `SELECT COUNT(*) as counts, type, pair, start_interval, end_interval FROM ?? WHERE status = ? AND fk_section_id = ? AND end_interval = DATE_FORMAT(DATE_ADD(DATE_SUB(NOW(), INTERVAL SECOND(NOW()) SECOND), INTERVAL 1 MINUTE), "%Y-%m-%d %H:%i:%s") GROUP BY type, pair`;
                 values = [db.tables.bets, 0, fk_section_id]
             } else {
-                query = `SELECT COUNT(*) as counts, type, pair, start_interval, end_interval FROM ?? WHERE status = ? GROUP BY type, pair`;
+                query = `SELECT COUNT(*) as counts, type, pair, start_interval, end_interval FROM ?? WHERE status = ? AND end_interval = DATE_FORMAT(DATE_ADD(DATE_SUB(NOW(), INTERVAL SECOND(NOW()) SECOND), INTERVAL 1 MINUTE), "%Y-%m-%d %H:%i:%s") GROUP BY type, pair`;
                 values = [db.tables.bets, 0]
             }
             db.DatabasePoolObject

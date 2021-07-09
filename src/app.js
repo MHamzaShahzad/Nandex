@@ -52,7 +52,7 @@ ws.on('open', async function open() {
 
 
     // CRON TASKS
-    cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
+   /* cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
         if (Object.keys(marketUpDown).length == 0)
@@ -98,7 +98,7 @@ ws.on('open', async function open() {
             })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' });
+    }, { timezone: 'Etc/UTC' }); */
 
 });
 
@@ -149,14 +149,14 @@ ws.on('message', function incoming(data) {
                 price: data.tick.quote,
                 epoch: data.tick.epoch
             })*/
-            /* DatabaseModel.insertCurrentMarket({
+            DatabaseModel.insertCurrentMarket({
                 fk_market_id: data.passthrough.fk_market_id,
                 market_bid: data.tick.bid,
                 market_time: moment(Date()).format('YYYY-MM-DD HH:mm:ss'),
                 epoch: data.tick.epoch,
                 active_symbol: data.tick.symbol,
                 price: data.tick.quote,
-            }) */
+            })
             break;
         default:
             websockets[data?.passthrough?.token]?.send(JSON.stringify(data))
@@ -194,30 +194,6 @@ wss.on('connection', function connection(client_ws, req) {
         delete streamsUsers[token]
         console.log('deleted: ' + token)
     });
-});
-
-ws.on('open', function open() {
-    // ws.send(JSON.stringify({
-    //     asset_index: 1
-    // }));
-    // ws.send(JSON.stringify({
-    //     active_symbols: "brief",
-    //     product_type: "basic"
-    // }));
-    ws.send(JSON.stringify({
-        ticks: 'frxAUDJPY',
-        subscribe: 1,
-        passthrough: { token: "111" }
-    }));
-    ws.send(JSON.stringify({
-        ticks_history: "frxAUDJPY",
-        adjust_start_time: 1,
-        count: 10,
-        end: "latest",
-        start: 1,
-        style: "ticks",
-        passthrough: { token: "111" }
-    }));
 });
 
 function randomNumber(min, max) {

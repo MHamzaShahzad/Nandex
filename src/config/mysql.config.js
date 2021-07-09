@@ -14,7 +14,7 @@ console.log(JSON.stringify(config))
 const DatabaseObject = new Database(config);
 
 // Pool Connection
-config.connectionLimit = 99;
+config.connectionLimit = 3;
 const DatabasePoolObject = new PoolDatabase(config);
 
 const tablesPrefix = "";
