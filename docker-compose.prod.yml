@@ -16,6 +16,11 @@ services:
       - "8080:80"
     volumes:
       - node_modules:/usr/src/app/node_modules
+    networks:
+      - app-network
     command: npm run start
+networks:
+  app-network:
+    driver: bridge
 volumes:
   node_modules:
