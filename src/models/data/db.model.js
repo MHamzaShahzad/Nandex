@@ -34,11 +34,11 @@ module.exports = {
             let query;
             let values = [];
             if (fk_section_id) {
-                query = `SELECT COUNT(*) as counts, type, pair, start_interval, end_interval FROM ?? WHERE status = ? AND fk_section_id = ? AND end_interval = DATE_FORMAT(DATE_ADD(DATE_SUB(NOW(), INTERVAL SECOND(NOW()) SECOND), INTERVAL 1 MINUTE), "%Y-%m-%d %H:%i:%s") GROUP BY type, pair`;
-                values = [db.tables.bets, 0, fk_section_id]
+                query = `SELECT COUNT(*) AS counts, t.symbol, b.type, b.pair, b.start_interval, b.end_interval FROM ?? b LEFT JOIN ?? t ON b.pair = t.symbol_name WHERE b.status = ? AND b.end_interval = DATE_FORMAT(DATE_ADD(DATE_SUB(NOW(), INTERVAL SECOND(NOW()) SECOND), INTERVAL 1 MINUTE), "%Y-%m-%d %H:%i:%s") AND b.fk_section_id = ? GROUP BY b.type, b.pair`;
+                values = [db.tables.bets, db.tables.trading_times, 0, fk_section_id]
             } else {
-                query = `SELECT COUNT(*) as counts, type, pair, start_interval, end_interval FROM ?? WHERE status = ? AND end_interval = DATE_FORMAT(DATE_ADD(DATE_SUB(NOW(), INTERVAL SECOND(NOW()) SECOND), INTERVAL 1 MINUTE), "%Y-%m-%d %H:%i:%s") GROUP BY type, pair`;
-                values = [db.tables.bets, 0]
+                query = `SELECT COUNT(*) AS counts, t.symbol, b.type, b.pair, b.start_interval, b.end_interval FROM ?? b LEFT JOIN ?? t ON b.pair = t.symbol_name WHERE b.status = ? AND b.end_interval = DATE_FORMAT(DATE_ADD(DATE_SUB(NOW(), INTERVAL SECOND(NOW()) SECOND), INTERVAL 1 MINUTE), "%Y-%m-%d %H:%i:%s") GROUP BY b.type, b.pair`;
+                values = [db.tables.bets, db.tables.trading_times, 0]
             }
             db.DatabasePoolObject
                 .query(query, values)

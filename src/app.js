@@ -7,14 +7,14 @@ const cron = require('node-cron');
 const url = require('url');
 const moment = require('moment');
 const WebSocket = require('ws');
-// const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
-let ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
+const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
+/* let ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
     origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
 });
 
 const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
 duplex.pipe(process.stdout);
-process.stdin.pipe(duplex);
+process.stdin.pipe(duplex); */
 
 const app = require('express')();
 const { createServer } = require('http');
@@ -48,57 +48,9 @@ ws.on('open', async function open() {
                     passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
                 }));
             });
+            cronTasks()
         });
-
-
-    // CRON TASKS
-   /* cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
-        console.log("--------------------------------------------------");
-        console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
-        if (Object.keys(marketUpDown).length == 0)
-            DatabaseModel.getIsCustomMarket()
-                .then(isMarketCustom => {
-                    return isMarketCustom[0].market_value == 0 ? DatabaseModel.getBets() : []
-                })
-                .then(data => {
-                    data.forEach(element => {
-                        if (marketUpDown[element.pair] && element.counts > marketUpDown[element.pair]?.counts) {
-                            marketUpDown[element.pair].type = element.type
-                            marketUpDown[element.pair].counts = element.counts
-                        } else if (marketUpDown[element.pair] && marketUpDown[element.pair]?.counts == element.counts) {
-                            delete marketUpDown[element.pair]
-                        } else {
-                            marketUpDown[element.pair] = { counts: element.counts, type: element.type }
-                        }
-                    });
-                });
-        Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 3);
-        })
-        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
-        console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' });
-
-    cron.schedule('0-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
-        console.log("--------------------------------------------------");
-        console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
-        Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 3);
-        })
-        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
-        console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' });
-
-    cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
-        console.log("--------------------------------------------------");
-        console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
-        if (Object.keys(marketUpDown).length > 0)
-            Object.keys(marketUpDown).forEach(key => {
-                delete marketUpDown[key];
-            })
-        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
-        console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' }); */
+    
 
 });
 
@@ -119,13 +71,13 @@ ws.on('message', function incoming(data) {
 
                 if (data.tick?.symbol == streamsUsers[streamers].ticks) {
 
-                    if (marketUpDown[streamsUsers[streamers].passthrough.pair]) {
-                        switch (marketUpDown[streamsUsers[streamers].passthrough.pair].type) {
+                    if (marketUpDown[streamsUsers[streamers].ticks]) {
+                        switch (marketUpDown[streamsUsers[streamers].ticks].type) {
                             case 0:
-                                data.tick.quote += data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].passthrough.pair].variation
+                                data.tick.quote += data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation
                                 break;
                             case 1:
-                                data.tick.quote -= data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].passthrough.pair].variation
+                                data.tick.quote -= data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation
                                 break;
                             default:
                                 break;
@@ -166,10 +118,10 @@ ws.on('message', function incoming(data) {
 
 ws.on('close', (code, reason) => {
     console.log(`BINARY_WEB_SOCKET_CLOSE_REASON: ${reason}`);
-    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
+    /* ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
     const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
     duplex.pipe(process.stdout);
-    process.stdin.pipe(duplex);
+    process.stdin.pipe(duplex); */
 });
 
 // Server
@@ -195,6 +147,58 @@ wss.on('connection', function connection(client_ws, req) {
         console.log('deleted: ' + token)
     });
 });
+
+function cronTasks() {
+    // CRON TASKS
+    cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
+        console.log("--------------------------------------------------");
+        console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
+        if (Object.keys(marketUpDown).length == 0)
+            DatabaseModel.getIsCustomMarket()
+                .then(isMarketCustom => {
+                    return isMarketCustom[0].market_value == 0 ? DatabaseModel.getBets() : []
+                })
+                .then(data => {
+                    data.forEach(element => {
+                        if (marketUpDown[element.symbol] && element.counts > marketUpDown[element.symbol]?.counts) {
+                            marketUpDown[element.symbol].type = element.type
+                            marketUpDown[element.symbol].counts = element.counts
+                        } else if (marketUpDown[element.symbol] && marketUpDown[element.symbol]?.counts == element.counts) {
+                            delete marketUpDown[element.symbol]
+                        } else {
+                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type }
+                        }
+                    });
+                });
+        Object.keys(marketUpDown).forEach(key => {
+            marketUpDown[key].variation = randomNumber(0, 3);
+        })
+        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
+        console.log("--------------------------------------------------");
+    }, { timezone: 'Etc/UTC' });
+
+    cron.schedule('0-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+        console.log("--------------------------------------------------");
+        console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
+        Object.keys(marketUpDown).forEach(key => {
+            marketUpDown[key].variation = randomNumber(0, 3);
+            marketUpDown[key].type = 0
+        })
+        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
+        console.log("--------------------------------------------------");
+    }, { timezone: 'Etc/UTC' });
+
+    cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+        console.log("--------------------------------------------------");
+        console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
+        if (Object.keys(marketUpDown).length > 0)
+            Object.keys(marketUpDown).forEach(key => {
+                delete marketUpDown[key];
+            })
+        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
+        console.log("--------------------------------------------------");
+    }, { timezone: 'Etc/UTC' });
+}
 
 function randomNumber(min, max) {
     return Math.random() * (max - min) + min;
