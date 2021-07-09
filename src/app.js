@@ -7,14 +7,14 @@ const cron = require('node-cron');
 const url = require('url');
 const moment = require('moment');
 const WebSocket = require('ws');
-const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
-/* let ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
+// const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
+let ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
     origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
 });
 
 const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
 duplex.pipe(process.stdout);
-process.stdin.pipe(duplex); */
+process.stdin.pipe(duplex);
 
 const app = require('express')();
 const { createServer } = require('http');
@@ -118,10 +118,10 @@ ws.on('message', function incoming(data) {
 
 ws.on('close', (code, reason) => {
     console.log(`BINARY_WEB_SOCKET_CLOSE_REASON: ${reason}`);
-    /* ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
+    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
     const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
     duplex.pipe(process.stdout);
-    process.stdin.pipe(duplex); */
+    process.stdin.pipe(duplex);
 });
 
 // Server
