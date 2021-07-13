@@ -127,10 +127,9 @@ wss.on('connection', function connection(client_ws, req) {
 
         if (jsonMessage?.ticks) streamsUsers[jsonMessage?.passthrough?.token] = jsonMessage
         else ws.send(JSON.stringify(jsonMessage))
-
         // client_ws.send(message)
     });
-
+    
     client_ws.on('close', function () {
         delete websockets[token]
         delete streamsUsers[token]
@@ -187,7 +186,7 @@ function cronTasks() {
             })
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState}`)
         if (ws.readyState !== WebSocket.OPEN)
-            initSocketConnection()
+            ws.close()
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
