@@ -8,13 +8,8 @@ const url = require('url');
 const moment = require('moment');
 const WebSocket = require('ws');
 // const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
-let ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
-    origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
-});
-
-const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
-duplex.pipe(process.stdout);
-process.stdin.pipe(duplex);
+let ws;
+initSocketConnection()
 
 const app = require('express')();
 const { createServer } = require('http');
@@ -50,8 +45,6 @@ ws.on('open', async function open() {
             });
             cronTasks()
         });
-    
-
 });
 
 ws.on('message', function incoming(data) {
@@ -118,10 +111,7 @@ ws.on('message', function incoming(data) {
 
 ws.on('close', (code, reason) => {
     console.log(`BINARY_WEB_SOCKET_CLOSE_REASON: ${reason}`);
-    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
-    const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
-    duplex.pipe(process.stdout);
-    process.stdin.pipe(duplex);
+    initSocketConnection()
 });
 
 // Server
@@ -156,7 +146,7 @@ function cronTasks() {
         if (Object.keys(marketUpDown).length == 0)
             DatabaseModel.getIsCustomMarket()
                 .then(isMarketCustom => {
-                    return isMarketCustom[0].market_value == 0 ? DatabaseModel.getBets() : []
+                    return isMarketCustom[0].market_value == 1 ? DatabaseModel.getBets() : []
                 })
                 .then(data => {
                     data.forEach(element => {
@@ -189,15 +179,28 @@ function cronTasks() {
     }, { timezone: 'Etc/UTC' });
 
     cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
-        console.log("--------------------------------------------------");
+        console.log(`--------------------------------------------------`);
         console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
         if (Object.keys(marketUpDown).length > 0)
             Object.keys(marketUpDown).forEach(key => {
                 delete marketUpDown[key];
             })
+        console.log(`WEB_SOCKET_STATUS: ${ws.readyState}`)
+        if (ws.readyState !== WebSocket.OPEN)
+            initSocketConnection()
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
+}
+
+function initSocketConnection() {
+    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
+        origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
+    });
+
+    const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
+    duplex.pipe(process.stdout);
+    process.stdin.pipe(duplex);
 }
 
 function randomNumber(min, max) {
