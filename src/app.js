@@ -110,7 +110,7 @@ ws.on('message', function incoming(data) {
 });
 
 ws.on('close', (code, reason) => {
-    console.log(`BINARY_WEB_SOCKET_CLOSE_REASON: ${reason}`);
+    console.log(`BINARY_WEB_SOCKET_CLOSED: ${code}`);
     initSocketConnection()
 });
 
@@ -119,7 +119,7 @@ wss.on('connection', function connection(client_ws, req) {
 
     const { query: { token } } = url.parse(req.url, true);
     websockets[token] = client_ws;
-
+    
     client_ws.on('message', function incoming(message) {
         console.log('received: %s', message);
 
@@ -129,7 +129,7 @@ wss.on('connection', function connection(client_ws, req) {
         else ws.send(JSON.stringify(jsonMessage))
         // client_ws.send(message)
     });
-    
+
     client_ws.on('close', function () {
         delete websockets[token]
         delete streamsUsers[token]
@@ -186,13 +186,14 @@ function cronTasks() {
             })
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState}`)
         if (ws.readyState !== WebSocket.OPEN)
-            ws.close()
+            ws.terminate()
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
 }
 
 function initSocketConnection() {
+    
     ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
         origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
     });
