@@ -30,7 +30,9 @@ server.listen(port, (err) => {
 });
 
 // Client for Binary
+
 ws.on('open', async function open() {
+    ws,isAlive = true
     await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
         DatabaseConfig.DatabaseObject.close()
     })
@@ -114,12 +116,38 @@ ws.on('close', (code, reason) => {
     initSocketConnection()
 });
 
+ws.on('pong', async function pong() {
+    console.log("BINARY_PONG")
+    ws.isAlive = true
+});
+
+ws.on('ping', async function ping() {
+    console.log("BINARY_PINGING")
+})
+
+setInterval(function ping() {
+    console.log('INTERVAL')
+    if (ws.isAlive === false) return ws.terminate();
+
+    ws.isAlive = false
+    ws.ping()
+
+}, 30000);
+
 // Server
+function noop() { }
+
 wss.on('connection', function connection(client_ws, req) {
+
+    client_ws.isAlive = true;
+    client_ws.on('pong', () => {
+        console.log("CLIENT_PONG")
+        client_ws.isAlive = true
+    });
 
     const { query: { token } } = url.parse(req.url, true);
     websockets[token] = client_ws;
-    
+
     client_ws.on('message', function incoming(message) {
         console.log('received: %s', message);
 
@@ -135,7 +163,22 @@ wss.on('connection', function connection(client_ws, req) {
         delete streamsUsers[token]
         console.log('deleted: ' + token)
     });
+
 });
+
+const interval = setInterval(function ping() {
+    console.log('CLIENT_SERVER_INTERVAL')
+    wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+
+        ws.isAlive = false;
+        ws.ping(noop);
+    });
+}, 30000);
+
+wss.on('close', () => {
+    clearInterval(interval);
+})
 
 function cronTasks() {
     // CRON TASKS
@@ -185,15 +228,18 @@ function cronTasks() {
                 delete marketUpDown[key];
             })
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState}`)
-        if (ws.readyState !== WebSocket.OPEN)
-            ws.terminate()
+        /* if (ws.readyState !== WebSocket.OPEN)
+            ws.terminate() */
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
 }
 
 function initSocketConnection() {
-    
+
+    // if (ws) ws.terminate()
+    // ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`)
+    ws = null
     ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
         origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
     });
