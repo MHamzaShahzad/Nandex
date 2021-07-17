@@ -111,10 +111,7 @@ ws.on('message', function incoming(data) {
     }
 });
 
-ws.on('close', (code, reason) => {
-    console.log(`BINARY_WEB_SOCKET_CLOSED: ${code}`);
-    initSocketConnection()
-});
+ws.on('close', initSocketConnection);
 
 ws.on('pong', async function pong() {
     console.log("BINARY_PONG")
@@ -139,14 +136,14 @@ function noop() { }
 
 wss.on('connection', function connection(client_ws, req) {
 
+    const { query: { token } } = url.parse(req.url, true);
     client_ws.isAlive = true;
+    websockets[token] = client_ws;
+
     client_ws.on('pong', () => {
         console.log("CLIENT_PONG")
         client_ws.isAlive = true
     });
-
-    const { query: { token } } = url.parse(req.url, true);
-    websockets[token] = client_ws;
 
     client_ws.on('message', function incoming(message) {
         console.log('received: %s', message);
