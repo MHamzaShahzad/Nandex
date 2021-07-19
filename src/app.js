@@ -32,7 +32,7 @@ server.listen(port, (err) => {
 // Client for Binary
 
 ws.on('open', async function open() {
-    ws,isAlive = true
+    ws, isAlive = true
     await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
         DatabaseConfig.DatabaseObject.close()
     })
@@ -225,8 +225,9 @@ function cronTasks() {
                 delete marketUpDown[key];
             })
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState}`)
-        /* if (ws.readyState !== WebSocket.OPEN)
-            ws.terminate() */
+        if (ws.readyState !== WebSocket.OPEN)
+            // ws.terminate()
+            initSocketConnection()
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
