@@ -13,8 +13,8 @@ let ws;
 initSocketConnection()
 
 // read ssl certificate
-var privateKey = fs.readFileSync('../../etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
-var certificate = fs.readFileSync('../../etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
+var privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
+var certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
 var credentials = { key: privateKey, cert: certificate };
 
 const app = require('express')();
