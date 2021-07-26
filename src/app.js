@@ -18,7 +18,7 @@ var certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fu
 var credentials = { key: privateKey, cert: certificate };
 
 const app = require('express')();
-const { createServer } = require('http');
+const { createServer } = require('https');
 const server = createServer(credentials, app);
 const wss = new WebSocket.Server({ server }),
     websockets = {},
