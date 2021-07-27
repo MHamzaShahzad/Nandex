@@ -212,7 +212,7 @@ function cronTasks() {
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
 
-    cron.schedule('0-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+    cron.schedule('1-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
