@@ -206,7 +206,7 @@ function cronTasks() {
                     });
                 });
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 0.1);
+            marketUpDown[key].variation = randomNumber(0, 0.03);
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -216,7 +216,7 @@ function cronTasks() {
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 0.1);
+            marketUpDown[key].variation = randomNumber(0, 0.03);
             marketUpDown[key].type = 0
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
