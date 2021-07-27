@@ -185,6 +185,7 @@ wss.on('close', () => {
 
 function cronTasks() {
     // CRON TASKS
+    let market_changed = false;
     cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
@@ -217,7 +218,13 @@ function cronTasks() {
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
             marketUpDown[key].variation = randomNumber(0, 0.01);
-            marketUpDown[key].type = 0
+            if (!market_changed) {
+                marketUpDown[key].type = {
+                    0: 1,
+                    1: 0
+                }[marketUpDown[key].type]
+                market_changed = true
+            }
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -226,6 +233,7 @@ function cronTasks() {
     cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log(`--------------------------------------------------`);
         console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
+        market_changed = false
         if (Object.keys(marketUpDown).length > 0)
             Object.keys(marketUpDown).forEach(key => {
                 delete marketUpDown[key];
