@@ -75,10 +75,10 @@ ws.on('message', function incoming(data) {
                     if (marketUpDown[streamsUsers[streamers].ticks]) {
                         switch (marketUpDown[streamsUsers[streamers].ticks].type) {
                             case 0:
-                                data.tick.quote += data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation
+                                data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
                             case 1:
-                                data.tick.quote -= data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation
+                                data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
                             default:
                                 break;
@@ -206,7 +206,7 @@ function cronTasks() {
                     });
                 });
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 3);
+            marketUpDown[key].variation = randomNumber(0, 5);
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -216,7 +216,7 @@ function cronTasks() {
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 3);
+            marketUpDown[key].variation = randomNumber(0, 5);
             marketUpDown[key].type = 0
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
