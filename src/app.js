@@ -249,7 +249,7 @@ function cronTasks() {
 }
 
 function initSocketConnection() {
-    console.log(`initSocketConnection: SOCKET_STATE: ${ws.readyState}`)
+    console.log(`initSocketConnection: SOCKET_STATE: ${ws?.readyState}`)
     if (ws) ws.terminate()
     // ws = null
     // ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`)
