@@ -215,7 +215,6 @@ const interval = setInterval(() => {
 
 function cronTasks() {
     // CRON TASKS
-    // let market_changed = false;
     cronJobs.push(cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
@@ -229,15 +228,16 @@ function cronTasks() {
                         if (marketUpDown[element.symbol] && element.counts > marketUpDown[element.symbol]?.counts) {
                             marketUpDown[element.symbol].type = element.type
                             marketUpDown[element.symbol].counts = element.counts
+                            marketUpDown[element.symbol].diff = element.diff
                         } else if (marketUpDown[element.symbol] && marketUpDown[element.symbol]?.counts == element.counts) {
                             delete marketUpDown[element.symbol]
                         } else {
-                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type }
+                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type, diff: element.diff }
                         }
                     });
                 });
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 0.01);
+            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -247,14 +247,7 @@ function cronTasks() {
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 0.005);
-            /* if (!market_changed) {
-                marketUpDown[key].type = {
-                    0: 1,
-                    1: 0
-                }[marketUpDown[key].type]
-                market_changed = true
-            } */
+            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
