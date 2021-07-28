@@ -149,10 +149,12 @@ binaryClientCloseListener()
 
 setInterval(() => {
     console.log('BINARY_PING_PONG_INTERVAL')
-    if (ws.isAlive === false) return ws.terminate();
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        if (ws.isAlive === false) return ws.terminate();
 
-    ws.isAlive = false
-    ws.ping()
+        ws.isAlive = false
+        ws.ping()
+    }
 
 }, BINARY_PING_PONG_INTERVAL);
 
