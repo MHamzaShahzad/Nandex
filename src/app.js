@@ -80,8 +80,6 @@ ws.on('message', function incoming(data) {
                             case 1:
                                 data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
-                            default:
-                                break;
                         }
                     }
 
@@ -129,7 +127,7 @@ ws.on('ping', async function ping() {
 })
 
 setInterval(function ping() {
-    console.log('INTERVAL')
+    console.log('BINARY_PING_PONG_INTERVAL')
     if (ws.isAlive === false) return ws.terminate();
 
     ws.isAlive = false
@@ -151,6 +149,10 @@ wss.on('connection', function connection(client_ws, req) {
         client_ws.isAlive = true
     });
 
+    client_ws.on('ping', () => {
+        console.log("CLIENT_PINGING")
+    });
+
     client_ws.on('message', function incoming(message) {
         console.log('received: %s', message);
 
@@ -170,7 +172,7 @@ wss.on('connection', function connection(client_ws, req) {
 });
 
 const interval = setInterval(function ping() {
-    console.log('CLIENT_SERVER_INTERVAL')
+    console.log('CLIENT_SERVER_PING_PONG_INTERVAL')
     wss.clients.forEach(function each(ws) {
         if (ws.isAlive === false) return ws.terminate();
 
@@ -185,7 +187,7 @@ wss.on('close', () => {
 
 function cronTasks() {
     // CRON TASKS
-    let market_changed = false;
+    // let market_changed = false;
     cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
@@ -217,14 +219,14 @@ function cronTasks() {
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, 0.01);
-            if (!market_changed) {
+            marketUpDown[key].variation = randomNumber(0, 0.005);
+            /* if (!market_changed) {
                 marketUpDown[key].type = {
                     0: 1,
                     1: 0
                 }[marketUpDown[key].type]
                 market_changed = true
-            }
+            } */
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -233,14 +235,13 @@ function cronTasks() {
     cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log(`--------------------------------------------------`);
         console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
-        market_changed = false
+        // market_changed = false
         if (Object.keys(marketUpDown).length > 0)
             Object.keys(marketUpDown).forEach(key => {
                 delete marketUpDown[key];
             })
-        console.log(`WEB_SOCKET_STATUS: ${ws.readyState}`)
+        console.log(`WEB_SOCKET_STATUS: ${ws.readyState} : ${WebSocket.OPEN}`)
         if (ws.readyState !== WebSocket.OPEN)
-            // ws.terminate()
             initSocketConnection()
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -248,8 +249,9 @@ function cronTasks() {
 }
 
 function initSocketConnection() {
+    console.log(`initSocketConnection: SOCKET_STATE: ${ws.readyState}`)
     if (ws) ws.terminate()
-    ws = null
+    // ws = null
     // ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`)
     ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
         origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
