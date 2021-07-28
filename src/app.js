@@ -10,18 +10,19 @@ const moment = require('moment');
 const WebSocket = require('ws');
 
 // read ssl certificate
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
+// const privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
+// const certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
+// const credentials = { key: privateKey, cert: certificate };
 
 const app = require('express')();
-const { createServer } = require('https');
-const server = createServer(credentials, app);
+const { createServer } = require('http');
+const server = createServer(app);
 const wss = new WebSocket.Server({ server }),
     websockets = {},
     streamsUsers = {};
 const closedMarkets = {};
 const marketUpDown = {}
+const cronJobs = []
 
 const port = process.env.PORT || 80;
 server.listen(port, (err) => {
@@ -37,7 +38,7 @@ let ws;
 const BINARY_PING_PONG_INTERVAL = 10000;
 
 const binaryClientOpenListener = async () => {
-    ws, isAlive = true
+    ws.isAlive = true
     await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
         DatabaseConfig.DatabaseObject.close()
     })
@@ -50,8 +51,8 @@ const binaryClientOpenListener = async () => {
                     passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
                 }));
             });
-            cronTasks()
         });
+    restartCrons()
 }
 
 const binaryClientMessageListener = (data) => {
@@ -215,7 +216,7 @@ const interval = setInterval(() => {
 function cronTasks() {
     // CRON TASKS
     // let market_changed = false;
-    cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
+    cronJobs.push(cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
         if (Object.keys(marketUpDown).length == 0)
@@ -240,9 +241,9 @@ function cronTasks() {
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' });
+    }, { scheduled: false, timezone: 'Etc/UTC' }));
 
-    cron.schedule('1-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+    cronJobs.push(cron.schedule('1-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         Object.keys(marketUpDown).forEach(key => {
@@ -257,9 +258,9 @@ function cronTasks() {
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' });
+    }, { scheduled: false, timezone: 'Etc/UTC' }));
 
-    cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+    cronJobs.push(cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log(`--------------------------------------------------`);
         console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
         // market_changed = false
@@ -270,7 +271,21 @@ function cronTasks() {
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState} : ${WebSocket.OPEN}`)
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
-    }, { timezone: 'Etc/UTC' });
+    }, { scheduled: false, timezone: 'Etc/UTC' }));
+}
+cronTasks()
+
+function stopCrons() {
+    cronJobs.forEach(cron => cron.stop());
+}
+
+function startCrons() {
+    cronJobs.forEach(cron => cron.start());
+}
+
+function restartCrons() {
+    stopCrons()
+    startCrons()
 }
 
 function randomNumber(min, max) {
