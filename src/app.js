@@ -10,13 +10,13 @@ const moment = require('moment');
 const WebSocket = require('ws');
 
 // read ssl certificate
-// const privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
-// const certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
-// const credentials = { key: privateKey, cert: certificate };
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const app = require('express')();
-const { createServer } = require('http');
-const server = createServer(app);
+const { createServer } = require('https');
+const server = createServer(credentials, app);
 const wss = new WebSocket.Server({ server }),
     websockets = {},
     streamsUsers = {};
