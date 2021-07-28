@@ -34,7 +34,7 @@ server.listen(port, (err) => {
 
 // BINARY CLIENT...
 let ws;
-const BINARY_PING_PONG_INTERVAL = 30000;
+const BINARY_PING_PONG_INTERVAL = 10000;
 
 const binaryClientOpenListener = async () => {
     ws, isAlive = true
@@ -266,8 +266,6 @@ function cronTasks() {
                 delete marketUpDown[key];
             })
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState} : ${WebSocket.OPEN}`)
-        if (ws.readyState !== WebSocket.OPEN)
-            initSocketConnection()
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
