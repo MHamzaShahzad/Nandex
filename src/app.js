@@ -40,7 +40,7 @@ const BINARY_PING_PONG_INTERVAL = 10000;
 const binaryClientOpenListener = async () => {
     ws.isAlive = true
     await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
-        DatabaseConfig.DatabaseObject.close()
+        DatabaseConfig.DatabaseObject.close().catch(error => {console.log("Error in closing single object connection, may be it's already closed.")})
     })
     DatabaseModel.getActiveSymbols()
         .then(data => {
