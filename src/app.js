@@ -8,14 +8,11 @@ const url = require('url');
 const fs = require("fs");
 const moment = require('moment');
 const WebSocket = require('ws');
-// const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`);
-let ws;
-initSocketConnection()
 
 // read ssl certificate
-var privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
-var certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
-var credentials = { key: privateKey, cert: certificate };
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/binary.itempire.info/fullchain.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const app = require('express')();
 const { createServer } = require('https');
@@ -32,12 +29,14 @@ server.listen(port, (err) => {
         console.log(err);
         return;
     }
-    console.log(`Your server is ready on post ${port}`);
+    console.log(`Your server is ready on port ${port}`);
 });
 
-// Client for Binary
+// BINARY CLIENT...
+let ws;
+const BINARY_PING_PONG_INTERVAL = 30000;
 
-ws.on('open', async function open() {
+const binaryClientOpenListener = async () => {
     ws, isAlive = true
     await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
         DatabaseConfig.DatabaseObject.close()
@@ -53,9 +52,9 @@ ws.on('open', async function open() {
             });
             cronTasks()
         });
-});
+}
 
-ws.on('message', function incoming(data) {
+const binaryClientMessageListener = (data) => {
     // console.log('Received: %s', data);
     data = JSON.parse(data);
     switch (data.msg_type) {
@@ -113,29 +112,53 @@ ws.on('message', function incoming(data) {
             websockets[data?.passthrough?.token]?.send(JSON.stringify(data))
             break;
     }
-});
+}
 
-ws.on('close', initSocketConnection);
-
-ws.on('pong', async function pong() {
+const binaryClientPongListener = async () => {
     console.log("BINARY_PONG")
     ws.isAlive = true
-});
+}
 
-ws.on('ping', async function ping() {
+const binaryClientPingListener = async () => {
     console.log("BINARY_PINGING")
-})
+}
 
-setInterval(function ping() {
+const binaryClientCloseListener = (event) => {
+    if (ws) {
+        console.error('Disconnected.');
+    }
+
+    ws = null
+    // ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`)
+    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
+        origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
+    });
+
+    const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
+    duplex.pipe(process.stdout);
+    process.stdin.pipe(duplex);
+
+    ws.on('open', binaryClientOpenListener);
+    ws.on('message', binaryClientMessageListener);
+    ws.on('pong', binaryClientPongListener);
+    ws.on('ping', binaryClientPingListener)
+    ws.on('close', binaryClientCloseListener);
+};
+
+binaryClientCloseListener()
+
+setInterval(() => {
     console.log('BINARY_PING_PONG_INTERVAL')
     if (ws.isAlive === false) return ws.terminate();
 
     ws.isAlive = false
     ws.ping()
 
-}, 30000);
+}, BINARY_PING_PONG_INTERVAL);
 
-// Server
+// SERVER...
+const CLIENT_SERVER_PING_PONG_INTERVAL = 30000
+
 function noop() { }
 
 wss.on('connection', function connection(client_ws, req) {
@@ -171,7 +194,11 @@ wss.on('connection', function connection(client_ws, req) {
 
 });
 
-const interval = setInterval(function ping() {
+wss.on('close', () => {
+    clearInterval(interval);
+})
+
+const interval = setInterval(() => {
     console.log('CLIENT_SERVER_PING_PONG_INTERVAL')
     wss.clients.forEach(function each(ws) {
         if (ws.isAlive === false) return ws.terminate();
@@ -179,11 +206,9 @@ const interval = setInterval(function ping() {
         ws.isAlive = false;
         ws.ping(noop);
     });
-}, 30000);
+}, CLIENT_SERVER_PING_PONG_INTERVAL);
 
-wss.on('close', () => {
-    clearInterval(interval);
-})
+// OTHERS...
 
 function cronTasks() {
     // CRON TASKS
@@ -246,20 +271,6 @@ function cronTasks() {
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
     }, { timezone: 'Etc/UTC' });
-}
-
-function initSocketConnection() {
-    console.log(`initSocketConnection: SOCKET_STATE: ${ws?.readyState}`)
-    if (ws) ws.terminate()
-    // ws = null
-    // ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`)
-    ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`, {
-        origin: `https:////ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`
-    });
-
-    const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
-    duplex.pipe(process.stdout);
-    process.stdin.pipe(duplex);
 }
 
 function randomNumber(min, max) {
