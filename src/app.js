@@ -16,7 +16,7 @@ const credentials = { key: privateKey, cert: certificate };
 
 const app = require('express')();
 const { createServer } = require('https');
-const server = createServer(credentials, app);
+const server = createServer( credentials, app);
 const wss = new WebSocket.Server({ server }),
     websockets = {},
     streamsUsers = {};
@@ -40,7 +40,7 @@ const BINARY_PING_PONG_INTERVAL = 10000;
 const binaryClientOpenListener = async () => {
     ws.isAlive = true
     await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
-        DatabaseConfig.DatabaseObject.close().catch(error => {console.log("Error in closing single object connection, may be it's already closed.")})
+        DatabaseConfig.DatabaseObject.close().catch(error => { console.log("Error in closing single object connection, may be it's already closed.") })
     })
     DatabaseModel.getActiveSymbols()
         .then(data => {
@@ -73,12 +73,21 @@ const binaryClientMessageListener = (data) => {
                 if (data.tick?.symbol == streamsUsers[streamers].ticks) {
 
                     if (marketUpDown[streamsUsers[streamers].ticks]) {
+                        const length = data.tick.quote.toString().split('.')[1].length
+                        /* let number = '0.';
+                        for (let i = 0; i < length - marketUpDown[streamsUsers[streamers].ticks].variation.toString().length; i++)
+                            number += '0'
+                        number += marketUpDown[streamsUsers[streamers].ticks].variation */
                         switch (marketUpDown[streamsUsers[streamers].ticks].type) {
                             case 0:
-                                data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
+                                data.tick.quote += parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
                                 break;
                             case 1:
-                                data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
+                                data.tick.quote -= parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
                                 break;
                         }
                     }
@@ -215,6 +224,9 @@ const interval = setInterval(() => {
 
 function cronTasks() {
     // CRON TASKS
+    let upDownIndex = -1;
+    let isStartTowardsCustom = true;
+    let isStartTowardsOriginal = true;
     cronJobs.push(cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
@@ -236,20 +248,37 @@ function cronTasks() {
                         }
                     });
                 });
+        if (isStartTowardsCustom) {
+            upDownIndex = -1
+            isStartTowardsCustom = false
+        }
+        upDownIndex += 1
+
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
+            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
-        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
+        console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsCustom}`)
         console.log("--------------------------------------------------");
     }, { scheduled: false, timezone: 'Etc/UTC' }));
 
     cronJobs.push(cron.schedule('1-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
+        
+        if (isStartTowardsOriginal) {
+            upDownIndex = 14
+            isStartTowardsOriginal = false
+        }
+        upDownIndex -= 1
+
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
+            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
-        console.log(`Object: ${JSON.stringify(marketUpDown)}`)
+        console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsCustom}`)
         console.log("--------------------------------------------------");
     }, { scheduled: false, timezone: 'Etc/UTC' }));
 
@@ -261,6 +290,8 @@ function cronTasks() {
             Object.keys(marketUpDown).forEach(key => {
                 delete marketUpDown[key];
             })
+        isStartTowardsCustom = true
+        isStartTowardsOriginal = true
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState} : ${WebSocket.OPEN}`)
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
@@ -283,4 +314,9 @@ function restartCrons() {
 
 function randomNumber(min, max) {
     return Math.random() * (max - min) + min;
+}
+
+function smoothNumber(start = 0, stop = 1, step = 0.1, index = 0) {
+    return (start, stop, step = 1) =>
+        Array(Math.ceil((stop - start) / step)).fill(start).map((x, y) => parseInt(x + y * step))[index]
 }
