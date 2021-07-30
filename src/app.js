@@ -255,9 +255,9 @@ function cronTasks() {
         upDownIndex += 1
 
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
             // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
-            // marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
+            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsCustom}`)
         console.log("--------------------------------------------------");
@@ -274,9 +274,9 @@ function cronTasks() {
         upDownIndex -= 1
 
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
             // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
-            // marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
+            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsOriginal}`)
         console.log("--------------------------------------------------");
