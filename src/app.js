@@ -248,11 +248,11 @@ function cronTasks() {
                         }
                     });
                 });
-        /* if (isStartTowardsCustom) {
+        if (isStartTowardsCustom) {
             upDownIndex = -1
             isStartTowardsCustom = false
         }
-        upDownIndex += 1 */
+        upDownIndex += 1
 
         Object.keys(marketUpDown).forEach(key => {
             marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
@@ -267,11 +267,11 @@ function cronTasks() {
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         
-        /* if (isStartTowardsOriginal) {
+        if (isStartTowardsOriginal) {
             upDownIndex = 14
             isStartTowardsOriginal = false
         }
-        upDownIndex -= 1 */
+        upDownIndex -= 1
 
         Object.keys(marketUpDown).forEach(key => {
             marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
