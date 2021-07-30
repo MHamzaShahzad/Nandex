@@ -73,21 +73,21 @@ const binaryClientMessageListener = (data) => {
                 if (data.tick?.symbol == streamsUsers[streamers].ticks) {
 
                     if (marketUpDown[streamsUsers[streamers].ticks]) {
-                        const length = data.tick.quote.toString().split('.')[1].length
+                        // const length = data.tick.quote.toString().split('.')[1].length
                         /* let number = '0.';
                         for (let i = 0; i < length - marketUpDown[streamsUsers[streamers].ticks].variation.toString().length; i++)
                             number += '0'
                         number += marketUpDown[streamsUsers[streamers].ticks].variation */
                         switch (marketUpDown[streamsUsers[streamers].ticks].type) {
                             case 0:
-                                // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
-                                data.tick.quote += parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
+                                // data.tick.quote += parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
                                 break;
                             case 1:
-                                // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
-                                data.tick.quote -= parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
+                                // data.tick.quote -= parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
                                 break;
                         }
                     }
@@ -248,16 +248,16 @@ function cronTasks() {
                         }
                     });
                 });
-        if (isStartTowardsCustom) {
+        /* if (isStartTowardsCustom) {
             upDownIndex = -1
             isStartTowardsCustom = false
         }
-        upDownIndex += 1
+        upDownIndex += 1 */
 
         Object.keys(marketUpDown).forEach(key => {
-            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
             // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
-            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
+            // marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsCustom}`)
         console.log("--------------------------------------------------");
@@ -267,18 +267,18 @@ function cronTasks() {
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         
-        if (isStartTowardsOriginal) {
+        /* if (isStartTowardsOriginal) {
             upDownIndex = 14
             isStartTowardsOriginal = false
         }
-        upDownIndex -= 1
+        upDownIndex -= 1 */
 
         Object.keys(marketUpDown).forEach(key => {
-            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
+            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff);
             // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
-            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
+            // marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
-        console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsCustom}`)
+        console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsOriginal}`)
         console.log("--------------------------------------------------");
     }, { scheduled: false, timezone: 'Etc/UTC' }));
 
@@ -290,8 +290,8 @@ function cronTasks() {
             Object.keys(marketUpDown).forEach(key => {
                 delete marketUpDown[key];
             })
-        isStartTowardsCustom = true
-        isStartTowardsOriginal = true
+        // isStartTowardsCustom = true
+        // isStartTowardsOriginal = true
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState} : ${WebSocket.OPEN}`)
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
