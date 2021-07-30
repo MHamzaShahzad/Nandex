@@ -240,11 +240,11 @@ function cronTasks() {
                         if (marketUpDown[element.symbol] && element.counts > marketUpDown[element.symbol]?.counts) {
                             marketUpDown[element.symbol].type = element.type
                             marketUpDown[element.symbol].counts = element.counts
-                            marketUpDown[element.symbol].diff = 0.001
+                            marketUpDown[element.symbol].diff = element.diff
                         } else if (marketUpDown[element.symbol] && marketUpDown[element.symbol]?.counts == element.counts) {
                             delete marketUpDown[element.symbol]
                         } else {
-                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type, diff: 0.001 }
+                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type, diff: element.diff }
                         }
                     });
                 });
