@@ -80,14 +80,14 @@ const binaryClientMessageListener = (data) => {
                         number += marketUpDown[streamsUsers[streamers].ticks].variation */
                         switch (marketUpDown[streamsUsers[streamers].ticks].type) {
                             case 0:
-                                data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
-                                // data.tick.quote += parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
+                                data.tick.quote += parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
                             case 1:
-                                data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
-                                // data.tick.quote -= parseFloat(marketUpDown[streamsUsers[streamers].ticks].variation.toFixed(length))
+                                data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
                         }
                     }
@@ -224,7 +224,7 @@ const interval = setInterval(() => {
 
 function cronTasks() {
     // CRON TASKS
-    let upDownIndex = -1;
+    let upDownIndex = 0;
     let isStartTowardsCustom = true;
     let isStartTowardsOriginal = true;
     cronJobs.push(cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
@@ -240,16 +240,16 @@ function cronTasks() {
                         if (marketUpDown[element.symbol] && element.counts > marketUpDown[element.symbol]?.counts) {
                             marketUpDown[element.symbol].type = element.type
                             marketUpDown[element.symbol].counts = element.counts
-                            marketUpDown[element.symbol].diff = element.diff
+                            marketUpDown[element.symbol].diff = 0.0001
                         } else if (marketUpDown[element.symbol] && marketUpDown[element.symbol]?.counts == element.counts) {
                             delete marketUpDown[element.symbol]
                         } else {
-                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type, diff: element.diff }
+                            marketUpDown[element.symbol] = { counts: element.counts, type: element.type, diff: 0.0001 }
                         }
                     });
                 });
         if (isStartTowardsCustom) {
-            upDownIndex = -1
+            upDownIndex = 0
             isStartTowardsCustom = false
         }
         upDownIndex += 1
@@ -268,7 +268,7 @@ function cronTasks() {
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         
         if (isStartTowardsOriginal) {
-            upDownIndex = 15
+            upDownIndex = 16
             isStartTowardsOriginal = false
         }
         upDownIndex -= 1
