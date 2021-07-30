@@ -268,7 +268,7 @@ function cronTasks() {
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
         
         if (isStartTowardsOriginal) {
-            upDownIndex = 14
+            upDownIndex = 15
             isStartTowardsOriginal = false
         }
         upDownIndex -= 1
@@ -290,8 +290,8 @@ function cronTasks() {
             Object.keys(marketUpDown).forEach(key => {
                 delete marketUpDown[key];
             })
-        // isStartTowardsCustom = true
-        // isStartTowardsOriginal = true
+        isStartTowardsCustom = true
+        isStartTowardsOriginal = true
         console.log(`WEB_SOCKET_STATUS: ${ws.readyState} : ${WebSocket.OPEN}`)
         console.log(`Object: ${JSON.stringify(marketUpDown)}`)
         console.log("--------------------------------------------------");
