@@ -4,7 +4,7 @@ module.exports = {
     getActiveSymbols: () => {
         return new Promise((resolve, reject) => {
             db.DatabasePoolObject
-                .query(`SELECT id, symbol, symbol_name FROM ??`, [db.tables.trading_times])
+                .query(`SELECT id, symbol, symbol_name FROM ?? WHERE status = ?`, [db.tables.trading_times, 1])
                 .then((data) => {
                     console.log(`${TAG} getActiveSymbols: ${JSON.stringify(data)}`);
                     return resolve(data);

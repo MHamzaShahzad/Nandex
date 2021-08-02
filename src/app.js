@@ -116,6 +116,8 @@ const binaryClientMessageListener = (data) => {
                 epoch: data.tick.epoch,
                 active_symbol: data.tick.symbol,
                 price: data.tick.quote,
+            }).catch(error => {
+                console.log(error)
             })
             break;
         default:
