@@ -36,28 +36,30 @@ server.listen(port, (err) => {
 });
 
 // BINARY CLIENT...
-let ws;
+let ws = null;
 const BINARY_PING_PONG_INTERVAL = 10000;
 
 const binaryClientOpenListener = async () => {
-    DatabaseConfig.getPoolConnectionPromissified().finally(() => {
-        DatabaseConfig.DatabaseObject.close()
-            .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
-            .finally(() => {
-                DatabaseModel.getActiveSymbols()
-                    .then(data => {
-                        data.forEach(element => {
-                            ws.send(JSON.stringify({
-                                ticks: element.symbol,
-                                subscribe: 1,
-                                passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
-                            }));
-                        });
-                    }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
-                restartCrons()
-            })
+    DatabaseConfig.DatabasePoolObject.close().finally(() => {
+        DatabaseConfig.getPoolConnectionPromissified().finally(() => {
+            DatabaseConfig.DatabaseObject.close()
+                .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
+                .finally(() => {
+                    console.log("Getting active symbols...")
+                    DatabaseModel.getActiveSymbols()
+                        .then(data => {
+                            data.forEach(element => {
+                                ws.send(JSON.stringify({
+                                    ticks: element.symbol,
+                                    subscribe: 1,
+                                    passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
+                                }));
+                            });
+                        }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
+                    restartCrons()
+                })
+        })
     })
-
 }
 
 const binaryClientMessageListener = (data) => {
