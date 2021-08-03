@@ -42,7 +42,7 @@ const BINARY_PING_PONG_INTERVAL = 10000;
 const binaryClientOpenListener = async () => {
     DatabaseConfig.getPoolConnectionPromissified().finally(() => {
         DatabaseConfig.DatabaseObject.close()
-            .catch(error => console.log(`Error in closing single object connection, may be it's already closed. Error: ${error}`))
+            .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
             .finally(() => {
                 DatabaseModel.getActiveSymbols()
                     .then(data => {
@@ -53,7 +53,7 @@ const binaryClientOpenListener = async () => {
                                 passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
                             }));
                         });
-                    });
+                    }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
                 restartCrons()
             })
     })
@@ -155,7 +155,7 @@ const binaryClientCloseListener = (event) => {
     duplex.pipe(process.stdout);
     process.stdin.pipe(duplex);
     ws.isAlive = true
-    
+
     ws.on('open', binaryClientOpenListener);
     ws.on('message', binaryClientMessageListener);
     ws.on('pong', binaryClientPongListener);
