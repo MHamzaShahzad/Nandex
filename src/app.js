@@ -40,7 +40,6 @@ let ws;
 const BINARY_PING_PONG_INTERVAL = 10000;
 
 const binaryClientOpenListener = async () => {
-    ws.isAlive = true
     DatabaseConfig.getPoolConnectionPromissified().finally(() => {
         DatabaseConfig.DatabaseObject.close()
             .catch(error => console.log(`Error in closing single object connection, may be it's already closed. Error: ${error}`))
@@ -155,7 +154,8 @@ const binaryClientCloseListener = (event) => {
     const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
     duplex.pipe(process.stdout);
     process.stdin.pipe(duplex);
-
+    ws.isAlive = true
+    
     ws.on('open', binaryClientOpenListener);
     ws.on('message', binaryClientMessageListener);
     ws.on('pong', binaryClientPongListener);
