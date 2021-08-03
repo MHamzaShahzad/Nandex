@@ -41,20 +41,24 @@ const BINARY_PING_PONG_INTERVAL = 10000;
 
 const binaryClientOpenListener = async () => {
     ws.isAlive = true
-    await DatabaseConfig.getPoolConnectionPromissified().finally(() => {
-        DatabaseConfig.DatabaseObject.close().catch(error => { console.log("Error in closing single object connection, may be it's already closed.") })
+    DatabaseConfig.getPoolConnectionPromissified().finally(() => {
+        DatabaseConfig.DatabaseObject.close()
+            .catch(error => console.log(`Error in closing single object connection, may be it's already closed. Error: ${error}`))
+            .finally(() => {
+                DatabaseModel.getActiveSymbols()
+                    .then(data => {
+                        data.forEach(element => {
+                            ws.send(JSON.stringify({
+                                ticks: element.symbol,
+                                subscribe: 1,
+                                passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
+                            }));
+                        });
+                    });
+                restartCrons()
+            })
     })
-    DatabaseModel.getActiveSymbols()
-        .then(data => {
-            data.forEach(element => {
-                ws.send(JSON.stringify({
-                    ticks: element.symbol,
-                    subscribe: 1,
-                    passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
-                }));
-            });
-        });
-    restartCrons()
+
 }
 
 const binaryClientMessageListener = (data) => {
@@ -270,7 +274,7 @@ function cronTasks() {
     cronJobs.push(cron.schedule('1-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
-        
+
         if (isStartTowardsOriginal) {
             upDownIndex = 16
             isStartTowardsOriginal = false
