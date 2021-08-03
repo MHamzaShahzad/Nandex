@@ -40,10 +40,11 @@ let ws = null;
 const BINARY_PING_PONG_INTERVAL = 10000;
 
 const binaryClientOpenListener = async () => {
-    DatabaseConfig.getPoolConnectionPromissified().finally(() => {
-        DatabaseConfig.DatabaseObject.close()
-            .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
-            .finally(() => {
+    stopCrons()
+    // DatabaseConfig.getPoolConnectionPromissified().finally(() => {
+        // DatabaseConfig.DatabaseObject.close()
+            // .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
+            // .finally(() => {
                 console.log("Getting active symbols...")
                 DatabaseModel.getActiveSymbols()
                     .then(data => {
@@ -56,8 +57,8 @@ const binaryClientOpenListener = async () => {
                         });
                     }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
                 restartCrons()
-            })
-    })
+            // })
+    // })
 }
 
 const binaryClientMessageListener = (data) => {
