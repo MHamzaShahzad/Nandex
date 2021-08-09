@@ -55,7 +55,7 @@ const binaryClientOpenListener = async () => {
                     passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
                 }));
             });
-        }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
+        }).catch(error => console.error(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
     restartCrons()
     // })
     // })
@@ -80,7 +80,7 @@ const binaryClientMessageListener = (data) => {
                                 passthrough: { fk_market_id: data.element.id, symbol_name: data.element.symbol_name }
                             }));
                         }).catch(error => {
-                            console.log(`binaryClientOpenListener: Error loading market ${data.tick} stream. Error: ${error}`)
+                            console.error(`binaryClientOpenListener: Error loading market ${data.tick} stream. Error: ${error}`)
                             closedMarkets[data.tick] = data.tick
                         });
                     /* ws.send(JSON.stringify({
@@ -134,7 +134,7 @@ const binaryClientMessageListener = (data) => {
                 active_symbol: data.tick.symbol,
                 price: data.tick.quote,
             }).catch(error => {
-                console.log(error)
+                console.error(error)
             })
             break;
         default:
@@ -144,18 +144,16 @@ const binaryClientMessageListener = (data) => {
 }
 
 const binaryClientPongListener = async () => {
-    console.log("BINARY_PONG")
+    console.info("BINARY_PONG")
     ws.isAlive = true
 }
 
 const binaryClientPingListener = async () => {
-    console.log("BINARY_PINGING")
+    console.info("BINARY_PINGING")
 }
 
 const binaryClientCloseListener = (event) => {
-    if (ws) {
-        console.error('Disconnected.');
-    }
+    if (ws) console.error('Disconnected.');
 
     ws = null
     // ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?l=EN&app_id=${ws_app_id}`)
@@ -179,7 +177,7 @@ const binaryClientCloseListener = (event) => {
 binaryClientCloseListener()
 
 setInterval(() => {
-    console.log('BINARY_PING_PONG_INTERVAL')
+    console.info('BINARY_PING_PONG_INTERVAL')
     if (ws && ws.readyState === WebSocket.OPEN) {
         if (ws.isAlive === false) return ws.terminate();
 
