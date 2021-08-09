@@ -42,22 +42,22 @@ const BINARY_PING_PONG_INTERVAL = 10000;
 const binaryClientOpenListener = async () => {
     stopCrons()
     // DatabaseConfig.getPoolConnectionPromissified().finally(() => {
-        // DatabaseConfig.DatabaseObject.close()
-            // .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
-            // .finally(() => {
-                console.log("Getting active symbols...")
-                DatabaseModel.getActiveSymbols()
-                    .then(data => {
-                        data.forEach(element => {
-                            ws.send(JSON.stringify({
-                                ticks: element.symbol,
-                                subscribe: 1,
-                                passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
-                            }));
-                        });
-                    }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
-                restartCrons()
-            // })
+    // DatabaseConfig.DatabaseObject.close()
+    // .catch(error => console.log(`binaryClientOpenListener: Error in closing single object connection, may be it's already closed. Error: ${error}`))
+    // .finally(() => {
+    console.log("Getting active symbols...")
+    DatabaseModel.getActiveSymbols()
+        .then(data => {
+            data.forEach(element => {
+                ws.send(JSON.stringify({
+                    ticks: element.symbol,
+                    subscribe: 1,
+                    passthrough: { fk_market_id: element.id, symbol_name: element.symbol_name }
+                }));
+            });
+        }).catch(error => console.log(`binaryClientOpenListener: Error loading market streams. Error: ${error}`));
+    restartCrons()
+    // })
     // })
 }
 
@@ -66,13 +66,27 @@ const binaryClientMessageListener = (data) => {
     data = JSON.parse(data);
     switch (data.msg_type) {
         case 'tick':
+            if (data.error) closedMarkets[data.echo_req.ticks] = data.echo_req.ticks
+
             for (const streamers in streamsUsers) {
 
                 if (closedMarkets[streamsUsers[streamers].ticks]) {
-                    ws.send(JSON.stringify({
+
+                    DatabaseModel.getActiveSymbol(streamsUsers[streamers].ticks)
+                        .then(data => {
+                            ws.send(JSON.stringify({
+                                ticks: data.element.symbol,
+                                subscribe: 1,
+                                passthrough: { fk_market_id: data.element.id, symbol_name: data.element.symbol_name }
+                            }));
+                        }).catch(error => {
+                            console.log(`binaryClientOpenListener: Error loading market ${data.tick} stream. Error: ${error}`)
+                            closedMarkets[data.tick] = data.tick
+                        });
+                    /* ws.send(JSON.stringify({
                         ticks: streamsUsers[streamers].ticks,
                         subscribe: 1
-                    }))
+                    })) */
                     delete closedMarkets[streamsUsers[streamers].ticks]
                 }
 
@@ -107,10 +121,7 @@ const binaryClientMessageListener = (data) => {
                 }
             }
 
-            if (data.error) {
-                closedMarkets[data.echo_req.ticks] = data.echo_req.ticks
-                break;
-            }
+            if (data.error) break;
             /* PusherConfig.PusherTrigger(`current_market_${data.tick.symbol}`, `current_market_tick`, {
                 price: data.tick.quote,
                 epoch: data.tick.epoch
@@ -155,6 +166,7 @@ const binaryClientCloseListener = (event) => {
     const duplex = WebSocket.createWebSocketStream(ws, { encoding: 'utf8' });
     duplex.pipe(process.stdout);
     process.stdin.pipe(duplex);
+
     ws.isAlive = true
 
     ws.on('open', binaryClientOpenListener);

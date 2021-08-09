@@ -15,6 +15,20 @@ module.exports = {
                 });
         });
     },
+    getActiveSymbol: (tick) => {
+        return new Promise((resolve, reject) => {
+            db.DatabasePoolObject
+                .query(`SELECT id, symbol, symbol_name FROM ?? WHERE symbol = ? AND status = ?`, [db.tables.trading_times, tick, 1])
+                .then((data) => {
+                    console.log(`${TAG} getActiveSymbols: ${JSON.stringify(data)}`);
+                    return resolve({element: data[0], tick});
+                })
+                .catch((e) => {
+                    console.log(`${TAG} getActiveSymbols-Error: ${e}`);
+                    return reject(e);
+                });
+        });
+    },
     insertCurrentMarket: (new_market) => {
         return new Promise((resolve, reject) => {
             db.DatabasePoolObject
