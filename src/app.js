@@ -252,7 +252,7 @@ function cronTasks() {
         if (Object.keys(marketUpDown).length == 0)
             DatabaseModel.getIsCustomMarket()
                 .then(isMarketCustom => {
-                    return isMarketCustom[0].market_value == 1 ? DatabaseModel.getBets() : []
+                    return isMarketCustom[0].market_value == 1 ? await DatabaseModel.getBets() : []
                 })
                 .then(data => {
                     data.forEach(element => {
