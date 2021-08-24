@@ -246,7 +246,7 @@ function cronTasks() {
     let upDownIndex = 0;
     let isStartTowardsCustom = true;
     let isStartTowardsOriginal = true;
-    cronJobs.push(cron.schedule('45-59 0-59 * * * *', async () => { // Every second for the interval of last 15 seconds of every minute
+    cronJobs.push(cron.schedule('55-59 0-59 * * * *', async () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
         if (Object.keys(marketUpDown).length == 0)
@@ -282,7 +282,7 @@ function cronTasks() {
         console.log("--------------------------------------------------");
     }, { scheduled: false, timezone: 'Etc/UTC' }));
 
-    cronJobs.push(cron.schedule('1-15 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+    cronJobs.push(cron.schedule('1-05 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
 
@@ -301,7 +301,7 @@ function cronTasks() {
         console.log("--------------------------------------------------");
     }, { scheduled: false, timezone: 'Etc/UTC' }));
 
-    cronJobs.push(cron.schedule('16 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
+    cronJobs.push(cron.schedule('06 0-59 * * * *', () => { // Every second for the interval of first 15 seconds of every minute
         console.log(`--------------------------------------------------`);
         console.log(`C Cron Task - READ - Time: ${new Date().toUTCString()}`);
         // market_changed = false
