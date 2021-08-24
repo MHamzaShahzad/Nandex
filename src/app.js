@@ -102,12 +102,12 @@ const binaryClientMessageListener = (data) => {
                             case 0:
                                 // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
-                                data.tick.quote += parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                data.tick.quote += parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5))
                                 break;
                             case 1:
                                 // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
-                                data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5))
                                 break;
                         }
                     }
