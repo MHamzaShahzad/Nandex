@@ -67,7 +67,7 @@ const binaryClientMessageListener = (data) => {
     switch (data.msg_type) {
         case 'tick':
             if (data.error) closedMarkets[data.echo_req.ticks] = data.echo_req.ticks
-
+            console.info("PRICE_BEFORE_CUSTOM_MARKET: " + data.tick.quote)
             for (const streamers in streamsUsers) {
 
                 if (closedMarkets[streamsUsers[streamers].ticks]) {
@@ -89,7 +89,7 @@ const binaryClientMessageListener = (data) => {
                     })) */
                     delete closedMarkets[streamsUsers[streamers].ticks]
                 }
-
+                
                 if (data.tick?.symbol == streamsUsers[streamers].ticks) {
 
                     if (marketUpDown[streamsUsers[streamers].ticks]) {
@@ -100,14 +100,14 @@ const binaryClientMessageListener = (data) => {
                         number += marketUpDown[streamsUsers[streamers].ticks].variation */
                         switch (marketUpDown[streamsUsers[streamers].ticks].type) {
                             case 0:
-                                data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
-                                // data.tick.quote += parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                data.tick.quote += parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
                             case 1:
-                                data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
-                                // data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
+                                data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
                                 break;
                         }
                     }
@@ -126,7 +126,7 @@ const binaryClientMessageListener = (data) => {
                 price: data.tick.quote,
                 epoch: data.tick.epoch
             })*/
-            console.info(data)
+            console.info("PRICE_AFTER_CUSTOM_MARKET: " + data.tick.quote)
             DatabaseModel.insertCurrentMarket({
                 fk_market_id: data.passthrough.fk_market_id,
                 market_bid: data.tick.bid,
@@ -275,9 +275,9 @@ function cronTasks() {
         upDownIndex += 1
 
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff) * upDownIndex;
+            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff) * upDownIndex;
             // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
-            // marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
+            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsCustom}`)
         console.log("--------------------------------------------------");
@@ -294,9 +294,9 @@ function cronTasks() {
         upDownIndex -= 1
 
         Object.keys(marketUpDown).forEach(key => {
-            marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff) * upDownIndex;
+            // marketUpDown[key].variation = randomNumber(0, marketUpDown[key].diff) * upDownIndex;
             // marketUpDown[key].variation = smoothNumber(0, marketUpDown[key].diff, marketUpDown[key].diff / 15, upDownIndex)
-            // marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
+            marketUpDown[key].variation = marketUpDown[key].diff * upDownIndex
         })
         console.log(`Object: ${JSON.stringify(marketUpDown)} - ${upDownIndex}: ${isStartTowardsOriginal}`)
         console.log("--------------------------------------------------");
