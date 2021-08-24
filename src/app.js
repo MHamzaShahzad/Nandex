@@ -126,6 +126,7 @@ const binaryClientMessageListener = (data) => {
                 price: data.tick.quote,
                 epoch: data.tick.epoch
             })*/
+            console.info(data)
             DatabaseModel.insertCurrentMarket({
                 fk_market_id: data.passthrough.fk_market_id,
                 market_bid: data.tick.bid,
