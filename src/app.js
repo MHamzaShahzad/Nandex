@@ -246,13 +246,13 @@ function cronTasks() {
     let upDownIndex = 0;
     let isStartTowardsCustom = true;
     let isStartTowardsOriginal = true;
-    cronJobs.push(cron.schedule('45-59 0-59 * * * *', () => { // Every second for the interval of last 15 seconds of every minute
+    cronJobs.push(cron.schedule('45-59 0-59 * * * *', async () => { // Every second for the interval of last 15 seconds of every minute
         console.log("--------------------------------------------------");
         console.log(`A Cron Task - READ - Time: ${new Date().toUTCString()}`);
         if (Object.keys(marketUpDown).length == 0)
-            DatabaseModel.getIsCustomMarket()
+            await DatabaseModel.getIsCustomMarket()
                 .then(isMarketCustom => {
-                    return isMarketCustom[0].market_value == 1 ? await DatabaseModel.getBets() : []
+                    return isMarketCustom[0].market_value == 1 ? DatabaseModel.getBets() : []
                 })
                 .then(data => {
                     data.forEach(element => {

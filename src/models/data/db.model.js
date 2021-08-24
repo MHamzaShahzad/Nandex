@@ -43,7 +43,7 @@ module.exports = {
                 });
         });
     },
-    getBets: async (fk_section_id = null) => {
+    getBets: (fk_section_id = null) => {
         return new Promise((resolve, reject) => {
             let query;
             let values = [];
