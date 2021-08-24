@@ -81,7 +81,7 @@ module.exports = {
                 });
         });
     },
-    getIsCustomMarket: () => {
+    getIsCustomMarket: async () => {
         return new Promise((resolve, reject) => {
             db.DatabasePoolObject
                 .query(`SELECT market_value FROM ?? WHERE id = ? LIMIT 1`, [db.tables.custom_market, 1])
