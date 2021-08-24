@@ -287,7 +287,7 @@ function cronTasks() {
         console.log(`B Cron Task - READ - Time: ${new Date().toUTCString()}`);
 
         if (isStartTowardsOriginal) {
-            upDownIndex = 16
+            upDownIndex = 6
             isStartTowardsOriginal = false
         }
         upDownIndex -= 1
