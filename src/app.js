@@ -110,6 +110,7 @@ const binaryClientMessageListener = (data) => {
                                 data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5))
                                 break;
                         }
+                        console.info("PRICE_CHANGE: " + parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5)))
                     }
 
                     websockets[streamers]?.send(JSON.stringify(data))
