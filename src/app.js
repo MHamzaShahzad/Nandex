@@ -68,6 +68,26 @@ const binaryClientMessageListener = (data) => {
         case 'tick':
             if (data.error) closedMarkets[data.echo_req.ticks] = data.echo_req.ticks
             console.info("PRICE_BEFORE_CUSTOM_MARKET: " + data.tick.quote)
+            if (data.tick?.symbol && marketUpDown[data.tick?.symbol]) {
+                // const length = data.tick.quote.toString().split('.')[1].length
+                /* let number = '0.';
+                for (let i = 0; i < length - marketUpDown[data.tick?.symbol].variation.toString().length; i++)
+                    number += '0'
+                number += marketUpDown[data.tick?.symbol].variation */
+                switch (marketUpDown[data.tick?.symbol].type) {
+                    case 0:
+                        // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[data.tick?.symbol].variation).toFixed(5))
+                        // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
+                        data.tick.quote += parseFloat((marketUpDown[data.tick?.symbol].variation)?.toFixed(5))
+                        break;
+                    case 1:
+                        // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[data.tick?.symbol].variation).toFixed(5))
+                        // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
+                        data.tick.quote -= parseFloat((marketUpDown[data.tick?.symbol].variation)?.toFixed(5))
+                        break;
+                }
+                console.info("PRICE_CHANGE: " + parseFloat((marketUpDown[data.tick?.symbol].variation)?.toFixed(5)))
+            }
             for (const streamers in streamsUsers) {
 
                 if (closedMarkets[streamsUsers[streamers].ticks]) {
@@ -91,28 +111,6 @@ const binaryClientMessageListener = (data) => {
                 }
                 
                 if (data.tick?.symbol == streamsUsers[streamers].ticks) {
-
-                    if (marketUpDown[streamsUsers[streamers].ticks]) {
-                        // const length = data.tick.quote.toString().split('.')[1].length
-                        /* let number = '0.';
-                        for (let i = 0; i < length - marketUpDown[streamsUsers[streamers].ticks].variation.toString().length; i++)
-                            number += '0'
-                        number += marketUpDown[streamsUsers[streamers].ticks].variation */
-                        switch (marketUpDown[streamsUsers[streamers].ticks].type) {
-                            case 0:
-                                // data.tick.quote += parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
-                                // data.tick.quote += parseFloat(parseFloat(number).toFixed(length))
-                                data.tick.quote += parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5))
-                                break;
-                            case 1:
-                                // data.tick.quote -= parseFloat((data.tick.quote / 100 * marketUpDown[streamsUsers[streamers].ticks].variation).toFixed(5))
-                                // data.tick.quote -= parseFloat(parseFloat(number).toFixed(length))
-                                data.tick.quote -= parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5))
-                                break;
-                        }
-                        console.info("PRICE_CHANGE: " + parseFloat((marketUpDown[streamsUsers[streamers].ticks].variation)?.toFixed(5)))
-                    }
-
                     websockets[streamers]?.send(JSON.stringify(data))
                 }
 
