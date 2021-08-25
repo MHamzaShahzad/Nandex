@@ -67,7 +67,7 @@ const binaryClientMessageListener = (data) => {
     switch (data.msg_type) {
         case 'tick':
             if (data.error) closedMarkets[data.echo_req.ticks] = data.echo_req.ticks
-            console.info("PRICE_BEFORE_CUSTOM_MARKET: " + data.tick.quote)
+            console.info("PRICE_BEFORE_CUSTOM_MARKET: " + data.tick?.quote)
             if (data.tick?.symbol && marketUpDown[data.tick?.symbol]) {
                 // const length = data.tick.quote.toString().split('.')[1].length
                 /* let number = '0.';
