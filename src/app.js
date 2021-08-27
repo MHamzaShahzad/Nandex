@@ -101,13 +101,13 @@ const binaryClientMessageListener = (data) => {
                             }));
                         }).catch(error => {
                             console.error(`binaryClientOpenListener: Error loading market ${data.tick} stream. Error: ${error}`)
-                            closedMarkets[data.tick] = data.tick
+                            closedMarkets[data.echo_req.ticks] = data.echo_req.ticks
                         });
                     /* ws.send(JSON.stringify({
                         ticks: streamsUsers[streamers].ticks,
                         subscribe: 1
                     })) */
-                    delete closedMarkets[streamsUsers[streamers].ticks]
+                    delete closedMarkets[data.echo_req.ticks]
                 }
                 
                 if (data.tick?.symbol == streamsUsers[streamers].ticks) {
